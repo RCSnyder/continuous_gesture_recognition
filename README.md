@@ -1,5 +1,7 @@
+
 # continuous_gesture_recognition
-## Directions: 
+
+## Directions:
 
 - Type the following commands:
 
