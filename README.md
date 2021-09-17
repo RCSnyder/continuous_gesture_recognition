@@ -1,1 +1,20 @@
 # continuous_gesture_recognition
+## Directions: 
+
+- Type the following commands:
+
+```
+git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
+```
+
+- Ensure you have Python 3.9 installed, navigate to the home directory and type:
+
+```
+pip install --upgrade pip
+python -m venv env
+env\Scripts\activate
+pip install -r requirements.txt
+cd ./src/app/
+set FLASK_APP=app.py
+flask run
+```
