@@ -12,7 +12,6 @@ git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
 - Ensure you have Python 3.9 installed, navigate to the home directory and type:
 
 ```
-pip install --upgrade pip
 python -m venv env
 ```
 
@@ -20,6 +19,7 @@ python -m venv env
 
 ```
 env\Scripts\activate
+pip install --upgrade pip
 pip install -r requirements.txt
 cd ./src/app/
 set FLASK_APP=app.py
@@ -30,6 +30,7 @@ flask run
 
 ```
 source env/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 cd ./src/app/
 set FLASK_APP=app.py
