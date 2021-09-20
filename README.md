@@ -18,10 +18,23 @@ git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
 - Double click on install_requirement_files.py
 - Double click on app.py to run the main program.
 
-### If on Linux or if the script does not work perform the virtual environment creation and requirements.txt installation manually
+### If on Linux perform the virtual environment creation and requirements.txt installation manually
 
 ```
+python -m venv env
 source env/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+cd ./src/app/
+set FLASK_APP=app.py
+flask run
+```
+
+### If on Windows and the script does not work perform the virtual environment creation and requirements.txt installation manually by following these steps
+
+```
+python -m venv env
+env/Scripts/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 cd ./src/app/
