@@ -1,16 +1,12 @@
 from flask import Flask, render_template, Response
 from importlib import import_module
-import os
+
 import camera_opencv
+import webbrowser
+import cv2
+import os
 
-Camera = import_module("camera_opencv").Camera
-
-# import camera driver
-# if os.environ.get('CAMERA'):
-#     Camera = import_module('camera_' + os.environ['CAMERA']).Camera
-# else:
-#     from camera import Camera
-
+camera=cv2.VideoCapture(0)
 
 app = Flask(__name__)
 
@@ -22,7 +18,13 @@ def index():
 def gen(camera):
     """Video streaming generator function."""
     while True:
-        frame = camera.get_frame()
+        success,frame=camera.read()
+        if not success:
+            break
+        else:
+            ret,buffer=cv2.imencode('.jpg',frame)
+            frame=buffer.tobytes()
+
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
@@ -30,9 +32,10 @@ def gen(camera):
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera()),
+    return Response(gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', threaded=True)
+    webbrowser.open("http://127.0.0.1:5000/")
+    app.run(host='127.0.0.1', threaded=True)
