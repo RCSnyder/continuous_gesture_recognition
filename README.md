@@ -30,7 +30,7 @@ set FLASK_APP=app.py
 flask run
 ```
 
-### If on Windows and the script does not work perform the virtual environment creation and requirements.txt installation manually by following these steps
+### If on Windows 10 and the script does not work perform the virtual environment creation and requirements.txt installation manually by following these steps
 
 ```
 python -m venv env
