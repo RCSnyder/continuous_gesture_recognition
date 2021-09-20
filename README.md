@@ -18,7 +18,7 @@ git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
 - Double click on install_requirement_files.py
 - Double click on app.py to run the main program.
 
-### If on Linux perform the virtual environment creation and requirements.txt installation manually
+### If on Linux, perform the virtual environment creation and requirements.txt installation manually
 
 ```
 python -m venv env
