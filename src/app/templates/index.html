@@ -1,64 +1,38 @@
 <!DOCTYPE html>
   
 <head>
-<style>
-h1 {text-align: center;}
-p {text-align: center;}
-div {text-align: center;}
-</style>
-<title>HTML Test</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<style type="text/css">
-  * {padding:0; margin:0;}
-  a {text-decoration:none;}
-  p {padding-left:10px;}
-  .container {width:940px; margin-left:auto; margin-right:auto;}
-  .header {background-color:#441111}
-  .header h1 {color:white; line-height:80px;}
-  .header img {float:left; height:70px; width:100px; padding:5px; margin-right:20px}
-  .nav {background-color:#ffdd99; height:498px;width:150px; float:left;}
-  .nav ul {margin:15px; list-style-type:none;}
-  .content {float:left; width:640px;}
-  .right {background-color:#bb9955; float:left; height:498px;width:150px;}
-  .footer {clear:left; background-color:#bb9955;}
-</style>
+    <title>HTML Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
 
 <body>
- <div class="container">
-  <div class="header">
-   
-   <h1>Video Streaming Demonstration</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <p><strong>Navigation</strong></p>
+                <ul>
+                    <li><a href="one.html">One</a></li>
+                    <li><a href="two.html">Two</a></li>
+                    <li><a href="three.html">Three</a></li>
+                    <button type="button" class="btn btn-primary" onclick="alert('Button One Was Clicked!')">Button One</button>
+                    <button type="button" class="btn btn-primary" onclick="alert('Button Two Was Clicked!')">Button Two</button>
+                </ul>
+            </div>
 
-  </div>
+            <div class="col-6">
+                <h1>Video Streaming Demonstration</h1>
+                <p><strong>Live Webcam</strong></p>
+                <img src="{{ url_for('video_feed') }}">
+            </div>
 
-  <div class="nav">
-   <p><strong>Navigation</strong></p>
-   <ul>
-    <li><a href="one.html">One</a></li>
-    <li><a href="two.html">Two</a></li>
-    <li><a href="three.html">Three</a></li>
-    <button type="button" onclick="alert('Button One Was Clicked!')">Button One</button>
-   <button type="button" onclick="alert('Button Two Was Clicked!')">Button Two</button>
-
-</ul>
-  </div>
-
-  <div class="content">
-   <p><strong>Video Title</strong></p>
-   <img src="{{ url_for('video_feed') }}">
-  </div>
-
-  <div class="right">
-   <p><strong>Right Side</strong></p>
-   <p><strong>Right Side</strong></p>
-   <p><strong>Right Side</strong></p>
-  </div>
-
-  <div class="footer">
-   <p>Footer</p>
-  </div>
-
- </div>
+            <div class="col">
+                <p><strong>Right Side</strong></p>
+                <p><strong>Right Side</strong></p>
+                <p><strong>Right Side</strong></p>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html> 
