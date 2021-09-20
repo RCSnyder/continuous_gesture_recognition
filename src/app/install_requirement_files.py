@@ -11,19 +11,21 @@ Directory = os.path.dirname(sys._getframe().f_code.co_filename)
 
 os.chdir(Directory)
 
+python_path = sys.executable
+
 if not os.path.isdir(Directory + '\\venv'):
-   os.system('C:\Python39\python.exe -m venv venv')
+   os.system(python_path + ' -m venv venv')
 
 os.system('venv\\Scripts\\activate')  # <-- for Windows
 
-os.system('C:\Python39\python.exe -m pip install --upgrade pip')
+os.system(python_path + ' -m pip install --upgrade pip')
 
 req_files = [f for f in os.listdir(Directory) if f.endswith('.txt')]
 
 # Look for and install all requirement files
 for file in os.listdir(Directory):
    if file.startswith('requirement') and file.endswith('.txt'):
-      os.system('C:\Python39\python.exe -m pip install -r ' + file)
+      os.system(python_path + ' -m pip install -r ' + file)
 
 print("")
 input('Installed Requirements. Press Enter to exit . . . ')
