@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import json
 import time
 
-label_dict = pd.read_csv('full_labels_csv', header=None)
+label_dict = pd.read_csv('jester-v1-labels.csv', header=None)
 ges = label_dict[0].tolist()
 
 # Capture video from computer camera
