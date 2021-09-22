@@ -10,7 +10,7 @@ camera = cv2.VideoCapture(0)
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
@@ -23,6 +23,21 @@ def gen(camera):
         if not success:
             break
         else:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
             ret, buffer = cv2.imencode('.jpg',frame)
             frame = buffer.tobytes()
 
@@ -30,11 +45,13 @@ def gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 
 if __name__ == '__main__':
