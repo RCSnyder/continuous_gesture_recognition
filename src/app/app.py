@@ -13,15 +13,16 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    selected_model_inference = "Model 1"
+    selected_model_inference = "no model"
     # selected_model_inference = request.form["flexModelSelection"]
     return render_template('index.html', selected_model_inference=selected_model_inference)
 
 
-# @app.route("/model_selection", methods=["POST"])
-# def model_selection():
-#     model = request.form["flexModelSelection"]
-#     return f"Model is {model}"
+@app.route("/start_inference", methods=["POST"])
+def model_selection():
+    selected_model_inference = request.form["flexModelSelection"]
+    return render_template('index.html', selected_model_inference=selected_model_inference)
+
 
 
 def gen(camera):
