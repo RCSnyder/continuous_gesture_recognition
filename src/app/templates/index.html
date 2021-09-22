@@ -14,41 +14,51 @@
         <div class="container">
             <div class="row">
                 <div class="col">
-
                     <div style="height: 15px;"></div>
-
                     <p><strong>Select a model for inference testing</strong></p>
-                    
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="Model 1" checked>
-                            <label class="form-check-label" for="flexRadioDefault1">
-                            Model 1
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="Model 2">
-                            <label class="form-check-label" for="flexRadioDefault2">
-                            Model 2
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" value="Model 3">
-                            <label class="form-check-label" for="flexRadioDefault3">
-                            Model 3
-                            </label>
-                        </div>
+                        <form action="/" method="POST">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault1" value="Model 1" checked>
+                                <label class="form-check-label" for="flexRadioDefault1">
+                                Model 1
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault2" value="Model 2">
+                                <label class="form-check-label" for="flexRadioDefault2">
+                                Model 2
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault3" value="Model 3">
+                                <label class="form-check-label" for="flexRadioDefault3">
+                                Model 3
+                                </label>
+                            </div>
+
+                            <div style="height: 20px;"></div>
+
+                            <button type="submit" class="btn btn-success btn-block" onclick="alert('HGR Started!')">Begin Gesture Detection</button>
+                        </form>
                 </div>
                 
                 <div class="col-8 text-center">
                     <p><strong>Live Webcam Stream</strong></p>
                     <img src="{{ url_for('video_feed') }}">
 
+                    
                     <div style="height: 10px;"></div>
-
+                    
+                    <div>
+                        <p><strong>Currently detecting {{ selected_model_inference }}</strong></p>
+                    </div>
+                    
+                    <!-- 
                     <div class='col-xs-3 text-md-center'>
                         <button type="button" class="btn btn-success btn-block" onclick="alert('HGR Started!')">Begin Gesture Detection</button>
                         <button type="button" class="btn btn-danger btn-block" onclick="alert('HGR Ended')">End Gesture Detection</button>
                     </div>
+                    -->
                 </div>
                 
                 <div class="col">

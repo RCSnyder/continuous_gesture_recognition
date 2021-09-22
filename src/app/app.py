@@ -1,4 +1,5 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
+import requests
 from importlib import import_module
 
 import camera_opencv
@@ -12,7 +13,15 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    selected_model_inference = "Model 1"
+    # selected_model_inference = request.form["flexModelSelection"]
+    return render_template('index.html', selected_model_inference=selected_model_inference)
+
+
+# @app.route("/model_selection", methods=["POST"])
+# def model_selection():
+#     model = request.form["flexModelSelection"]
+#     return f"Model is {model}"
 
 
 def gen(camera):
@@ -24,20 +33,6 @@ def gen(camera):
             break
         else:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
             ret, buffer = cv2.imencode('.jpg',frame)
             frame = buffer.tobytes()
 
