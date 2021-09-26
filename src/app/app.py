@@ -46,16 +46,20 @@ def get_model_selected():
 @app.route('/', defaults={'selected_model_name': None}, methods=['GET', 'POST'])
 @app.route("/<any(Model_1, Model_2, Model_3):selected_model_name>")
 def index(selected_model_name):
-    gesture_recognition_state = "not started."
-    if request.method == 'POST':
-        print(request.form['recognition_toggle'])
-        if request.form['recognition_toggle'] == 'started':
-            gesture_recognition_state = 'has started'
-        elif request.form['recognition_toggle'] == 'ended':
-            gesture_recognition_state = 'has ended'
-        else:
-            pass # unknown
-    return render_template("index.html", selected_model_name=selected_model_name, gesture_recognition_state=gesture_recognition_state)
+    gesture_recognition_state  = request.args.get('gesture_recognition_state', None)
+    if gesture_recognition_state == None:
+        gesture_recognition_state = "off"
+    if gesture_recognition_state == "on" and selected_model_name == None:
+        selected_model_name = "Model_1"
+    return render_template("index.html",
+                            selected_model_name=selected_model_name,
+                            gesture_recognition_state=gesture_recognition_state)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return 'You want path: %s' % path
 
 
 def gen(camera):
