@@ -22,6 +22,7 @@ import transforms as t
 import matplotlib.pyplot as plt
 import json
 import time
+import jsonify
 
 
 label_dict = pd.read_csv('jester-v1-labels.csv', header=None)
@@ -32,22 +33,32 @@ camera.set(cv2.CAP_PROP_FPS, 48)
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    selected_model_inference = "no model"
-    # selected_model_inference = request.form["flexModelSelection"]
-    return render_template('index.html', selected_model_inference=selected_model_inference)
+@app.route('/get_model_selected', methods=['POST'])
+def get_model_selected():
+    try:
+        model_selected = request.form.get('model_selected')
+        print(model_selected)
+        return jsonify(model_selected=model_selected)
+    except Exception as e:
+        return str(e)
 
 
-@app.route("/start_inference", methods=["POST"])
-def model_selection():
-    selected_model_inference = request.form["flexModelSelection"]
-    return render_template('index.html', selected_model_inference=selected_model_inference)
+@app.route('/', defaults={'selected_model_name': None}, methods=['GET', 'POST'])
+@app.route("/<any(Model_1, Model_2, Model_3):selected_model_name>")
+def index(selected_model_name):
+    return render_template("index.html", selected_model_name=selected_model_name)#, selected_model_inference=selected_model_inference)
+
+
+#@app.route("/start_inference", methods=["POST"])
+#def model_selection():
+#    selected_model_inference = request.form["flexModelSelection"]
+#    return render_template('index.html', selected_model_inference=selected_model_inference)
 
 
 def gen(camera):
     """Video streaming generator function."""
 
+    """
     # Set up some storage variables
     seq_len = 16
     value = 0
@@ -81,6 +92,7 @@ def gen(camera):
     num_classes = 27
 
     score_energy = torch.zeros((eval_samples, num_classes))
+    """
 
     while True:
         success, frame = camera.read()
@@ -88,7 +100,7 @@ def gen(camera):
         if not success:
             break
         else:
-
+            """
             resized_frame = cv2.resize(frame, (160, 120))
             pre_img = Image.fromarray(resized_frame.astype('uint8'), 'RGB')
 
@@ -143,9 +155,9 @@ def gen(camera):
                 cv2.putText(bg, ges[top],(700,200-70*i), font, 1,(255,255,255),1)
                 cv2.rectangle(bg,(700,225-70*i),(int(700+out[top]*170),205-70*i),(255,255,255),3)
 
+            """
 
-
-            ret, buffer = cv2.imencode('.jpg', bg)
+            ret, buffer = cv2.imencode('.jpg', frame)#bg)
             frame = buffer.tobytes()
 
         yield (b'--frame\r\n'

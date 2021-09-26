@@ -4,6 +4,7 @@
         <title>Continuous Gesture Recognition Demo</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
     </head>
 
     <header>
@@ -15,31 +16,15 @@
             <div class="row">
                 <div class="col">
                     <div style="height: 15px;"></div>
-                    <p><strong>Select a model for inference testing</strong></p>
-                        <form action="/start_inference" method="POST">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault1" value="Model 1">
-                                <label class="form-check-label" for="flexRadioDefault1">
-                                Model 1
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault2" value="Model 2">
-                                <label class="form-check-label" for="flexRadioDefault2">
-                                Model 2
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="flexModelSelection" id="flexRadioDefault3" value="Model 3">
-                                <label class="form-check-label" for="flexRadioDefault3">
-                                Model 3
-                                </label>
-                            </div>
+                    <h5>Select a model for inference demo</h5>
+                    <div class="list-group">
+                        <a href="{{ url_for('index', selected_model_name='Model_1') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_1' %}active{% endif %}">Model 1</a>
+                        <a href="{{ url_for('index', selected_model_name='Model_2') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_2' %}active{% endif %}">Model 2</a>
+                        <a href="{{ url_for('index', selected_model_name='Model_3') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_3' %}active{% endif %}">Model 3</a> 
+                      </div>
 
-                            <div style="height: 20px;"></div>
-
-                            <button type="submit" class="btn btn-success btn-block">Begin Gesture Detection</button>
-                        </form>
+                      <div style="height: 15px;"></div>
+                      <h6> {{ selected_model_name }} selected</h6>
                 </div>
                 
                 <div class="col-8 text-center">
@@ -50,7 +35,7 @@
                     <div style="height: 10px;"></div>
                     
                     <div>
-                        <p><strong>Currently detecting {{ selected_model_inference }}</strong></p>
+                        <p><strong>Currently detecting {{ selected_model_name }}</strong></p>
                     </div>
                     
                     <!-- 
