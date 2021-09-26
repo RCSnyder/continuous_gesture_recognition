@@ -46,13 +46,16 @@ def get_model_selected():
 @app.route('/', defaults={'selected_model_name': None}, methods=['GET', 'POST'])
 @app.route("/<any(Model_1, Model_2, Model_3):selected_model_name>")
 def index(selected_model_name):
-    return render_template("index.html", selected_model_name=selected_model_name)#, selected_model_inference=selected_model_inference)
-
-
-#@app.route("/start_inference", methods=["POST"])
-#def model_selection():
-#    selected_model_inference = request.form["flexModelSelection"]
-#    return render_template('index.html', selected_model_inference=selected_model_inference)
+    gesture_recognition_state = "not started."
+    if request.method == 'POST':
+        print(request.form['recognition_toggle'])
+        if request.form['recognition_toggle'] == 'started':
+            gesture_recognition_state = 'has started'
+        elif request.form['recognition_toggle'] == 'ended':
+            gesture_recognition_state = 'has ended'
+        else:
+            pass # unknown
+    return render_template("index.html", selected_model_name=selected_model_name, gesture_recognition_state=gesture_recognition_state)
 
 
 def gen(camera):
