@@ -15,8 +15,9 @@
         <div class="container">
             <div class="row">
                 <div class="col">
+                    <div style="height: 20px;"></div>
+                    <h5 class="text-left">Select a model for inference demo <br> then press Begin Gesture Recognition</h5>
                     <div style="height: 15px;"></div>
-                    <h5>Select a model for inference demo</h5>
                     <div class="list-group">
                         <a href="{{ url_for('index', selected_model_name='Model_1') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_1' %}active{% endif %}">Model 1</a>
                         <a href="{{ url_for('index', selected_model_name='Model_2') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_2' %}active{% endif %}">Model 2</a>
@@ -38,12 +39,13 @@
                         <p><strong>Currently detecting {{ selected_model_name }}</strong></p>
                     </div>
                     
-                    <!-- 
+                    <div style="height: 10px;"></div>
+
                     <div class='col-xs-3 text-md-center'>
-                        <button type="button" class="btn btn-success btn-block" onclick="alert('HGR Started!')">Begin Gesture Detection</button>
-                        <button type="button" class="btn btn-danger btn-block" onclick="alert('HGR Ended')">End Gesture Detection</button>
+                        <button type="button" class="btn btn-success btn-block">Begin Gesture Detection</button>
+                        <button type="button" class="btn btn-danger btn-block">End Gesture Detection</button>
                     </div>
-                    -->
+                    
                 </div>
                 
                 <div class="col">
