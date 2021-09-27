@@ -171,11 +171,11 @@ def Demo_Model_1_20BNJester_gen(camera):
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             if value > 0.6:
-                cv2.putText(bg, ges[pred],(40,40), font, 1,(0,0,0),2)
+                cv2.putText(bg, ges[pred],(10,10), font, 1,(0,0,0),2)
             cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
             for i, top in enumerate(top_3):
-                cv2.putText(bg, ges[top],(700,200-70*i), font, 1,(255,255,255),1)
-                cv2.rectangle(bg,(700,225-70*i),(int(700+out[top]*170),205-70*i),(255,255,255),3)
+                cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
+                cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
 
         
             ret, buffer = cv2.imencode('.jpg', bg)
