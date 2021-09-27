@@ -67,6 +67,7 @@ def gen(camera):
 
     while True:
         success, frame = camera.read()
+        cv2.flip(frame, 1, frame)
         
         if not success:
             break
@@ -118,6 +119,8 @@ def Demo_Model_1_20BNJester_gen(camera):
 
     while True:
         success, frame = camera.read()
+        cv2.flip(frame, 1, frame)
+        
         if not success:
             break
         else:
@@ -158,12 +161,12 @@ def Demo_Model_1_20BNJester_gen(camera):
 
                 df = pd.DataFrame(mean_hist, columns=ges)
 
-                ax.clear()
-                df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
-                if setup:
-                    plt.show(block = False)
-                    setup=False
-                plt.draw()
+                # ax.clear()
+                # df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
+                # if setup:
+                #     plt.show(block = False)
+                #     setup=False
+                # plt.draw()
 
             n += 1
             bg = np.full((480, 640, 3), 15, np.uint8)
