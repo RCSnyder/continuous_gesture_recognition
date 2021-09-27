@@ -33,6 +33,7 @@ camera.set(cv2.CAP_PROP_FPS, 48)
 
 app = Flask(__name__)
 
+
 @app.route('/get_model_selected', methods=['POST'])
 def get_model_selected():
     try:
