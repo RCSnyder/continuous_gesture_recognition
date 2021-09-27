@@ -81,51 +81,48 @@ def gen(camera):
 
 def Demo_Model_1_20BNJester_gen(camera):
     """Video streaming generator function for Demo_Model_1_20BNJester."""
+    fig, ax = plt.subplots()
+    # Set up some storage variables
+    seq_len = 16
+    value = 0
+    imgs = []
+    pred = 8
+    top_3 = [9,8,7]
+    out = np.zeros(10)
+
+    model = FullModel(batch_size=1, seq_lenght=16)
+    loaded_dict = torch.load('demo.ckp')
+    model.load_state_dict(loaded_dict)
+    model = model.cuda()
+    model.eval()
+
+    std, mean = [0.2674,  0.2676,  0.2648], [ 0.4377,  0.4047,  0.3925]
+    transform = Compose([
+        t.CenterCrop((96, 96)),
+        t.ToTensor(),
+        t.Normalize(std=std, mean=mean),
+    ])
+
+    s = time.time()
+    n = 0
+    hist = []
+    mean_hist = []
+    setup = True
+    plt.ion()
+    
+    cooldown = 0
+    eval_samples = 2
+    num_classes = 27
+
+    score_energy = torch.zeros((eval_samples, num_classes))
+
     while True:
         success, frame = camera.read()
-
-        """
-        # Set up some storage variables
-        seq_len = 16
-        value = 0
-        imgs = []
-        pred = 8
-        top_3 = [9,8,7]
-        out = np.zeros(10)
-
-        model = FullModel(batch_size=1, seq_lenght=16)
-        loaded_dict = torch.load('demo.ckp')
-        model.load_state_dict(loaded_dict)
-        model = model.cuda()
-        model.eval()
-
-        std, mean = [0.2674,  0.2676,  0.2648], [ 0.4377,  0.4047,  0.3925]
-        transform = Compose([
-            t.CenterCrop((96, 96)),
-            t.ToTensor(),
-            t.Normalize(std=std, mean=mean),
-        ])
-
-        s = time.time()
-        n = 0
-        hist = []
-        mean_hist = []
-        setup = True
-        plt.ion()
-        # fig, ax = plt.subplots()
-        cooldown = 0
-        eval_samples = 2
-        num_classes = 27
-
-        score_energy = torch.zeros((eval_samples, num_classes))
-        """
-        
         if not success:
             break
         else:
-            image = cv2.rectangle(frame, (5,5), (300,300), (0,255,0), 2)
+            # image = cv2.rectangle(frame, (5,5), (300,300), (0,255,0), 2)
 
-            """
             resized_frame = cv2.resize(frame, (160, 120))
             pre_img = Image.fromarray(resized_frame.astype('uint8'), 'RGB')
 
@@ -169,7 +166,7 @@ def Demo_Model_1_20BNJester_gen(camera):
                 plt.draw()
 
             n += 1
-            bg = np.full((480, 1200, 3), 15, np.uint8)
+            bg = np.full((480, 640, 3), 15, np.uint8)
             bg[:480, :640] = frame
 
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -180,9 +177,8 @@ def Demo_Model_1_20BNJester_gen(camera):
                 cv2.putText(bg, ges[top],(700,200-70*i), font, 1,(255,255,255),1)
                 cv2.rectangle(bg,(700,225-70*i),(int(700+out[top]*170),205-70*i),(255,255,255),3)
 
-            """
-
-            ret, buffer = cv2.imencode('.jpg', image)
+        
+            ret, buffer = cv2.imencode('.jpg', bg)
             frame = buffer.tobytes()
 
         yield (b'--frame\r\n'
