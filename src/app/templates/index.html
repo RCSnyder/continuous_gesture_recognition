@@ -37,8 +37,11 @@
 
                         {% if selected_model_name == 'Demo_Model_1_20BNJester' %}
                             <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}">
+
+                        {% else %}
+                            <img src="{{ url_for('video_feed') }}">
                         {% endif %}
-                        
+
                     {% endif %}
                     
 

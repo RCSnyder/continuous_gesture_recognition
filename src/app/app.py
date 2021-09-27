@@ -65,48 +65,66 @@ def catch_all(path):
 def gen(camera):
     """Video streaming generator function."""
 
-    """
-    # Set up some storage variables
-    seq_len = 16
-    value = 0
-    imgs = []
-    pred = 8
-    top_3 = [9,8,7]
-    out = np.zeros(10)
-
-    model = FullModel(batch_size=1, seq_lenght=16)
-    loaded_dict = torch.load('demo.ckp')
-    model.load_state_dict(loaded_dict)
-    model = model.cuda()
-    model.eval()
-
-    std, mean = [0.2674,  0.2676,  0.2648], [ 0.4377,  0.4047,  0.3925]
-    transform = Compose([
-        t.CenterCrop((96, 96)),
-        t.ToTensor(),
-        t.Normalize(std=std, mean=mean),
-    ])
-
-    s = time.time()
-    n = 0
-    hist = []
-    mean_hist = []
-    setup = True
-    plt.ion()
-    fig, ax = plt.subplots()
-    cooldown = 0
-    eval_samples = 2
-    num_classes = 27
-
-    score_energy = torch.zeros((eval_samples, num_classes))
-    """
-
     while True:
         success, frame = camera.read()
         
         if not success:
             break
         else:
+            
+            ret, buffer = cv2.imencode('.jpg', frame)#bg)
+            frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+def Demo_Model_1_20BNJester_gen(camera):
+    """Video streaming generator function for Demo_Model_1_20BNJester."""
+    while True:
+        success, frame = camera.read()
+
+        """
+        # Set up some storage variables
+        seq_len = 16
+        value = 0
+        imgs = []
+        pred = 8
+        top_3 = [9,8,7]
+        out = np.zeros(10)
+
+        model = FullModel(batch_size=1, seq_lenght=16)
+        loaded_dict = torch.load('demo.ckp')
+        model.load_state_dict(loaded_dict)
+        model = model.cuda()
+        model.eval()
+
+        std, mean = [0.2674,  0.2676,  0.2648], [ 0.4377,  0.4047,  0.3925]
+        transform = Compose([
+            t.CenterCrop((96, 96)),
+            t.ToTensor(),
+            t.Normalize(std=std, mean=mean),
+        ])
+
+        s = time.time()
+        n = 0
+        hist = []
+        mean_hist = []
+        setup = True
+        plt.ion()
+        # fig, ax = plt.subplots()
+        cooldown = 0
+        eval_samples = 2
+        num_classes = 27
+
+        score_energy = torch.zeros((eval_samples, num_classes))
+        """
+        
+        if not success:
+            break
+        else:
+            image = cv2.rectangle(frame, (5,5), (300,300), (0,255,0), 2)
+
             """
             resized_frame = cv2.resize(frame, (160, 120))
             pre_img = Image.fromarray(resized_frame.astype('uint8'), 'RGB')
@@ -164,22 +182,6 @@ def gen(camera):
 
             """
 
-            ret, buffer = cv2.imencode('.jpg', frame)#bg)
-            frame = buffer.tobytes()
-
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
-def Demo_Model_1_20BNJester_gen(camera):
-    """Video streaming generator function for Demo_Model_1_20BNJester."""
-    while True:
-        success, frame = camera.read()
-        
-        if not success:
-            break
-        else:
-            image = cv2.rectangle(frame, (5,5), (100,100), (255,0,0), 2)
             ret, buffer = cv2.imencode('.jpg', image)
             frame = buffer.tobytes()
 
