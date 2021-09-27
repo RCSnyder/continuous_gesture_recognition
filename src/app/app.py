@@ -171,6 +171,28 @@ def gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+def Demo_Model_1_20BNJester_gen(camera):
+    """Video streaming generator function for Demo_Model_1_20BNJester."""
+    while True:
+        success, frame = camera.read()
+        
+        if not success:
+            break
+        else:
+            image = cv2.rectangle(frame, (5,5), (100,100), (255,0,0), 2)
+            ret, buffer = cv2.imencode('.jpg', image)
+            frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+@app.route('/Demo_Model_1_20BNJester_video_feed')
+def Demo_Model_1_20BNJester_video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(Demo_Model_1_20BNJester_gen(camera),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 @app.route('/video_feed')
 def video_feed():

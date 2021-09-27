@@ -30,9 +30,18 @@
                 
                 <div class="col-8 text-center">
                     <p><strong>Live Webcam Stream</strong></p>
-                    <img src="{{ url_for('video_feed') }}">
-
                     
+                    {% if gesture_recognition_state == 'off' %}
+                        <img src="{{ url_for('video_feed') }}">
+                    {% else %}
+
+                        {% if selected_model_name == 'Demo_Model_1_20BNJester' %}
+                            <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}">
+                        {% endif %}
+                        
+                    {% endif %}
+                    
+
                     <div style="height: 10px;"></div>
                     
                     <div>
