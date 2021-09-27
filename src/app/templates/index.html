@@ -19,7 +19,7 @@
                     <h5 class="text-left">1. Select a model for inference</h5>
                     <div style="height: 15px;"></div>
                     <div class="list-group">
-                        <a href="{{ url_for('index', selected_model_name='Model_1') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_1' %}active{% endif %}">Model 1</a>
+                        <a href="{{ url_for('index', selected_model_name='Demo_Model_1_20BNJester') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Demo_Model_1_20BNJester' %}active{% endif %}">Demo_Model_1_20BNJester</a>
                         <a href="{{ url_for('index', selected_model_name='Model_2') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_2' %}active{% endif %}">Model 2</a>
                         <a href="{{ url_for('index', selected_model_name='Model_3') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_3' %}active{% endif %}">Model 3</a> 
                       </div>
@@ -36,7 +36,13 @@
                     <div style="height: 10px;"></div>
                     
                     <div>
-                        <p><strong>Gesture Detection and Recognition {{ gesture_recognition_state }}</strong></p>
+                        <h3>Gesture Detection and Recognition is:</h3>
+                        {% if gesture_recognition_state == 'on' %}
+                            <h3 style="color: green">ON</h3>
+                        {% else %}
+                            <h3 style="color: red">OFF</h3>
+                        {% endif %}
+                        
                     </div>
                     
                     <div style="height: 10px;"></div>
