@@ -44,13 +44,13 @@ def get_model_selected():
 
 
 @app.route('/', defaults={'selected_model_name': None}, methods=['GET', 'POST'])
-@app.route("/<any(Model_1, Model_2, Model_3):selected_model_name>")
+@app.route("/<any(Demo_Model_1_20BNJester, Model_2, Model_3):selected_model_name>")
 def index(selected_model_name):
     gesture_recognition_state  = request.args.get('gesture_recognition_state', None)
     if gesture_recognition_state == None:
         gesture_recognition_state = "off"
     if gesture_recognition_state == "on" and selected_model_name == None:
-        selected_model_name = "Model_1"
+        selected_model_name = "Demo_Model_1_20BNJester"
     return render_template("index.html",
                             selected_model_name=selected_model_name,
                             gesture_recognition_state=gesture_recognition_state)
@@ -65,7 +65,24 @@ def catch_all(path):
 def gen(camera):
     """Video streaming generator function."""
 
-    """
+    while True:
+        success, frame = camera.read()
+        cv2.flip(frame, 1, frame)
+        
+        if not success:
+            break
+        else:
+            
+            ret, buffer = cv2.imencode('.jpg', frame)#bg)
+            frame = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+def Demo_Model_1_20BNJester_gen(camera):
+    """Video streaming generator function for Demo_Model_1_20BNJester."""
+    fig, ax = plt.subplots()
     # Set up some storage variables
     seq_len = 16
     value = 0
@@ -92,22 +109,23 @@ def gen(camera):
     hist = []
     mean_hist = []
     setup = True
-    plt.ion()
-    fig, ax = plt.subplots()
+    # plt.ion()
+    
     cooldown = 0
     eval_samples = 2
     num_classes = 27
 
     score_energy = torch.zeros((eval_samples, num_classes))
-    """
 
     while True:
         success, frame = camera.read()
+        cv2.flip(frame, 1, frame)
         
         if not success:
             break
         else:
-            """
+            # image = cv2.rectangle(frame, (5,5), (300,300), (0,255,0), 2)
+
             resized_frame = cv2.resize(frame, (160, 120))
             pre_img = Image.fromarray(resized_frame.astype('uint8'), 'RGB')
 
@@ -143,33 +161,38 @@ def gen(camera):
 
                 df = pd.DataFrame(mean_hist, columns=ges)
 
-                ax.clear()
-                df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
-                if setup:
-                    plt.show(block = False)
-                    setup=False
-                plt.draw()
+                # ax.clear()
+                # df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
+                # if setup:
+                #     plt.show(block = False)
+                #     setup=False
+                # plt.draw()
 
             n += 1
-            bg = np.full((480, 1200, 3), 15, np.uint8)
+            bg = np.full((480, 640, 3), 15, np.uint8)
             bg[:480, :640] = frame
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             if value > 0.6:
-                cv2.putText(bg, ges[pred],(40,40), font, 1,(0,0,0),2)
+                cv2.putText(bg, ges[pred],(20,465), font, 1,(0,255,0),2)
             cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
             for i, top in enumerate(top_3):
-                cv2.putText(bg, ges[top],(700,200-70*i), font, 1,(255,255,255),1)
-                cv2.rectangle(bg,(700,225-70*i),(int(700+out[top]*170),205-70*i),(255,255,255),3)
+                cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
+                cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
 
-            """
-
-            ret, buffer = cv2.imencode('.jpg', frame)#bg)
+        
+            ret, buffer = cv2.imencode('.jpg', bg)
             frame = buffer.tobytes()
 
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+
+@app.route('/Demo_Model_1_20BNJester_video_feed')
+def Demo_Model_1_20BNJester_video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(Demo_Model_1_20BNJester_gen(camera),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/video_feed')
