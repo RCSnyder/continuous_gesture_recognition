@@ -38,34 +38,6 @@
                             <p class="card-text">{{ selected_model_name }}</p>
                         </div>
                     </div>
-
-                    <div class="card bg-light mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Model Description/Info</h5>
-                                {% if selected_model_name == 'None' %}
-                                <p card-text>
-                                    None
-                                </p>
-                                {% elif selected_model_name == 'Demo_Model_1_20BNJester' %}
-                                <p card-text>
-                                    This demo model was trained on The 20BN-jester Dataset V1.
-                                    For more information please visit the Github page at:
-                                </p>
-                                <a href="https://github.com/fabiopk/RT_GestureRecognition"
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    class="card-link">https://github.com/fabiopk/RT_GestureRecognition</a>
-                                {% else %}
-                                    <p card-text>
-                                        None.
-                                    </p>
-                                {% endif %}
-
-
-                        </div>
-                    </div>
-
-                    
                 </div>
                 
                 <div class="col-8 text-center">
@@ -97,7 +69,29 @@
                                 <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=on"><button type="button" class="btn btn-success btn-block" name="recognition_toggle" value="Begin Gesture Detection">Begin Gesture Detection</button></a>
                                 <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=off"><button type="button" class="btn btn-danger btn-block" name="recognition_toggle" value="End Gesture Detection">End Gesture Detection</button></a>
                             </div>
-
+                        </div>
+                    </div>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Model Description/Info</h5>
+                                {% if selected_model_name == 'None' %}
+                                <p card-text>
+                                    None
+                                </p>
+                                {% elif selected_model_name == 'Demo_Model_1_20BNJester' %}
+                                <p card-text>
+                                    This demo model was trained on The 20BN-jester Dataset V1.
+                                    For more information please visit the Github page at:
+                                </p>
+                                <a href="https://github.com/fabiopk/RT_GestureRecognition"
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    class="card-link">https://github.com/fabiopk/RT_GestureRecognition</a>
+                                {% else %}
+                                    <p card-text>
+                                        None.
+                                    </p>
+                                {% endif %}
                         </div>
                     </div>
                 </div>
@@ -114,7 +108,6 @@
                 </div>
             </div>
         </div>
-        <div style="height: 25px;"></div>
 
         <div class="container">
             <div class="card bg-light mb-3">
