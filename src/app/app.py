@@ -109,7 +109,7 @@ def Demo_Model_1_20BNJester_gen(camera):
     hist = []
     mean_hist = []
     setup = True
-    plt.ion()
+    # plt.ion()
     
     cooldown = 0
     eval_samples = 2
