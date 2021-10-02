@@ -26,7 +26,7 @@
 
                             <div class="list-group list-group-flush">
                                 <a href="{{ url_for('index', selected_model_name='Demo_Model_1_20BNJester') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Demo_Model_1_20BNJester' %}active{% endif %}">Demo_Model_1_20BNJester</a>
-                                <a href="{{ url_for('index', selected_model_name='Model_2') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_2' %}active{% endif %}">Model 2</a>
+                                <a href="{{ url_for('index', selected_model_name='Google_MediaPipe_Holistic_Model') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Google_MediaPipe_Holistic_Model' %}active{% endif %}">Google_MediaPipe_Holistic_Model</a>
                                 <a href="{{ url_for('index', selected_model_name='Model_3') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_3' %}active{% endif %}">Model 3</a> 
                             </div>
                         </div>
@@ -50,6 +50,9 @@
                             {% else %}
                                 {% if selected_model_name == 'Demo_Model_1_20BNJester' %}
                                     <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}">
+
+                                {% elif selected_model_name == 'Google_MediaPipe_Holistic_Model'%}
+                                    <img src="{{ url_for('holistic_model_video_feed') }}">
                                 {% else %}
                                     <img src="{{ url_for('video_feed') }}">
                                 {% endif %}
@@ -75,21 +78,41 @@
                         <div class="card-body">
                             <h5 class="card-title">Model Description/Info</h5>
                                 {% if selected_model_name == 'None' %}
-                                <p card-text>
-                                    None
-                                </p>
+                                    <p card-text>
+                                        Select a model to see more information!
+                                    </p>
                                 {% elif selected_model_name == 'Demo_Model_1_20BNJester' %}
-                                <p card-text>
-                                    This demo model was trained on The 20BN-jester Dataset V1.
-                                    For more information please visit the Github page at:
-                                </p>
-                                <a href="https://github.com/fabiopk/RT_GestureRecognition"
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    class="card-link">https://github.com/fabiopk/RT_GestureRecognition</a>
+                                    <p card-text>
+                                        This demo model was trained on The 20BN-jester Dataset V1.
+                                        For more information please visit the Github page at:
+                                    </p>
+                                    <a href="https://github.com/fabiopk/RT_GestureRecognition"
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        class="card-link">https://github.com/fabiopk/RT_GestureRecognition</a>
+                                {% elif selected_model_name == 'Google_MediaPipe_Holistic_Model' %}
+                                    <p card-text>
+                                        This demo model is called MediaPipe BlazePose GHUM 3D and was created by Google. Click the links below to find out more information.
+                                    </p>
+                                    <a href="https://google.github.io/mediapipe/solutions/holistic.html"
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        class="card-link">Google's Mediapipe Holistic Live Perception Model</a>
+                                    <div></div>
+
+                                    <a href="https://github.com/google/mediapipe"
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        class="card-link">https://github.com/google/mediapipe</a>
+                                    <div></div>
+
+                                    <a href="https://drive.google.com/file/d/10WlcTvrQnR_R2TdTmKw0nkyRLqrwNkWU/preview"
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        class="card-link">BlazePose GHUM 3D Model Card</a>
                                 {% else %}
                                     <p card-text>
-                                        None.
+                                        Select a model to see more information!
                                     </p>
                                 {% endif %}
                         </div>
@@ -100,9 +123,7 @@
                 <div class="col">
                     <div class="card bg-light mb-3">
                         <div class="card-body">
-                            <p class="card-text"><strong>Right Side</strong></p>
-                            <p class="card-text"><strong>Right Side</strong></p>
-                            <p class="card-text"><strong>Right Side</strong></p>
+                            <p class="card-text"><strong>Placeholder for Data</strong></p>
                         </div>
                     </div>
                 </div>
@@ -138,7 +159,27 @@
                                 <source src="https://continuous-gesture-recognition-dataset-examples.s3.amazonaws.com/IPN_Hand/1CM42_26_R_+173.mp4" type='video/mp4' />
                             </video>
                         </div>
-                        <div class="col-6">
+                    
+                        <div class="col-2">
+                            <video id="example_video_1" class="video-js vjs-default-skin card-img"
+                                controls preload="auto" width="200" height="150"
+                                data-setup='{"example_option":true}'>
+                                <source src="https://continuous-gesture-recognition-dataset-examples.s3.amazonaws.com/IPN_Hand/4CM11_17_R_+14.mp4" type='video/mp4' />
+                            </video>
+                        </div>
+                        <div class="col-2">
+                            <video id="example_video_1" class="video-js vjs-default-skin card-img"
+                                controls preload="auto" width="200" height="150"
+                                data-setup='{"example_option":true}'>
+                                <source src="https://continuous-gesture-recognition-dataset-examples.s3.amazonaws.com/IPN_Hand/1CV12_1_R_+68.mp4" type='video/mp4' />
+                            </video>
+                        </div>
+                        <div class="col-2">
+                            <video id="example_video_1" class="video-js vjs-default-skin card-img"
+                                controls preload="auto" width="200" height="150"
+                                data-setup='{"example_option":true}'>
+                                <source src="https://continuous-gesture-recognition-dataset-examples.s3.amazonaws.com/IPN_Hand/1CM42_13_R_+141.mp4" type='video/mp4' />
+                            </video>
                         </div>
                     </div>
                 </div>
