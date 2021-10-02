@@ -26,7 +26,7 @@
 
                             <div class="list-group list-group-flush">
                                 <a href="{{ url_for('index', selected_model_name='Demo_Model_1_20BNJester') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Demo_Model_1_20BNJester' %}active{% endif %}">Demo_Model_1_20BNJester</a>
-                                <a href="{{ url_for('index', selected_model_name='Model_2') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_2' %}active{% endif %}">Model 2</a>
+                                <a href="{{ url_for('index', selected_model_name='Google_MediaPipe_Holistic_Model') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Google_MediaPipe_Holistic_Model' %}active{% endif %}">Google_MediaPipe_Holistic_Model</a>
                                 <a href="{{ url_for('index', selected_model_name='Model_3') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Model_3' %}active{% endif %}">Model 3</a> 
                             </div>
                         </div>
@@ -50,6 +50,9 @@
                             {% else %}
                                 {% if selected_model_name == 'Demo_Model_1_20BNJester' %}
                                     <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}">
+
+                                {% elif selected_model_name == 'Google_MediaPipe_Holistic_Model'%}
+                                    <img src="{{ url_for('holistic_model_video_feed') }}">
                                 {% else %}
                                     <img src="{{ url_for('video_feed') }}">
                                 {% endif %}

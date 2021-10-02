@@ -24,6 +24,12 @@ import json
 import time
 import jsonify
 
+import cv2
+import mediapipe as mp
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_holistic = mp.solutions.holistic
+
 
 label_dict = pd.read_csv('jester-v1-labels.csv', header=None)
 ges = label_dict[0].tolist()
@@ -44,7 +50,7 @@ def get_model_selected():
 
 
 @app.route('/', defaults={'selected_model_name': None}, methods=['GET', 'POST'])
-@app.route("/<any(Demo_Model_1_20BNJester, Model_2, Model_3):selected_model_name>")
+@app.route("/<any(Demo_Model_1_20BNJester, Google_MediaPipe_Holistic_Model, Model_3):selected_model_name>")
 def index(selected_model_name):
     gesture_recognition_state  = request.args.get('gesture_recognition_state', None)
     if gesture_recognition_state == None:
@@ -199,6 +205,59 @@ def Demo_Model_1_20BNJester_video_feed():
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     return Response(gen(camera),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+
+def holistic_model_gen(camera):
+    """Video streaming generator function for holistic_model_gen."""
+
+    while True:
+        success, frame = camera.read()
+        
+        if not success:
+            break
+        else:
+            with mp_holistic.Holistic(
+                min_detection_confidence=0.5,
+                min_tracking_confidence=0.5) as holistic:
+
+                    # Flip the frame horizontally for a later selfie-view display, and convert
+                    # the BGR frame to RGB.
+                    frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
+                    # To improve performance, optionally mark the frame as not writeable to
+                    # pass by reference.
+                    frame.flags.writeable = False
+                    results = holistic.process(frame)
+
+                    # Draw landmark annotation on the image.
+                    frame.flags.writeable = True
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                    mp_drawing.draw_landmarks(
+                        frame,
+                        results.face_landmarks,
+                        mp_holistic.FACEMESH_CONTOURS,
+                        landmark_drawing_spec=None,
+                        connection_drawing_spec=mp_drawing_styles
+                        .get_default_face_mesh_contours_style())
+                    mp_drawing.draw_landmarks(
+                        frame,
+                        results.pose_landmarks,
+                        mp_holistic.POSE_CONNECTIONS,
+                        landmark_drawing_spec=mp_drawing_styles
+                        .get_default_pose_landmarks_style())
+               
+                    ret, buffer = cv2.imencode('.jpg', frame)#bg)
+                    frame = buffer.tobytes()
+
+                    yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+@app.route('/holistic_model_video_feed')
+def holistic_model_video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(holistic_model_gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
