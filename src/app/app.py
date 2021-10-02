@@ -247,7 +247,7 @@ def holistic_model_gen(camera):
                         landmark_drawing_spec=mp_drawing_styles
                         .get_default_pose_landmarks_style())
                
-                    ret, buffer = cv2.imencode('.jpg', frame)#bg)
+                    ret, buffer = cv2.imencode('.jpg', frame)
                     frame = buffer.tobytes()
 
                     yield (b'--frame\r\n'
