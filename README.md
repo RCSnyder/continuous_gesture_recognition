@@ -39,7 +39,7 @@ git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
 ### If on Windows 10 and the script does not work perform the virtual environment creation and requirements.txt installation manually by following these steps
 
 ```
-cd .\src\app
+cd continuous_gesture_recognition\src\app
 python -m venv env
 env\Scripts\activate
 pip install --upgrade pip
