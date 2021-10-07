@@ -42,3 +42,5 @@ set FLASK_APP=app.py
 flask run
 
 ```
+
+Go to 127.0.0.1:5000 in a web browser to view the app.
