@@ -23,12 +23,12 @@ https://www.python.org/downloads/
 ```
 
 - For simplicity sake, just put Python39 directory in C:/Python39
+- You may need to remove all Python versions and anaconda packages.
 
 ### For Windows 10
 
 - Navigate to a preferred directory with >10gb space.
 - Copy and paste this code into the terminal
-
 
 ```
 git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
