@@ -43,8 +43,8 @@ cd continuous_gesture_recognition\src\app
 python -m venv env
 env\Scripts\activate
 pip install --upgrade pip
-pip install -r requirements.txt
 pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio===0.9.1 -f https://download.pytorch.org/whl/torch_stable.html
+pip install -r requirements.txt
 set FLASK_APP=app.py
 flask run
 ```
