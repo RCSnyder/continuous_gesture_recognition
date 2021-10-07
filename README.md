@@ -23,7 +23,7 @@ https://www.python.org/downloads/
 ```
 
 - For simplicity sake, just put Python39 directory in C:/Python39
-- You may need to remove all Python versions and anaconda packages.
+- You may need to remove all other Python versions and Anaconda packages.
 
 ### For Windows 10
 
