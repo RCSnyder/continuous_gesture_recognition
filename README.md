@@ -24,21 +24,14 @@ https://www.python.org/downloads/
 
 - For simplicity sake, just put Python39 directory in C:/Python39
 
-- Navigate to a preferred directory for the project and type the following commands:
+### For Windows 10
+
+- Navigate to a preferred directory with >10gb space.
+- Copy and paste this code into the terminal
+
 
 ```
 git clone https://github.com/RCSnyder/continuous_gesture_recognition.git
-```
-
-### For Windows 10
-
-- Navigate to ./src/app/
-- Double click on install_requirement_files.py
-- Double click on app.py to run the main program.
-
-### If on Windows 10 and the script does not work perform the virtual environment creation and requirements.txt installation manually by following these steps
-
-```
 cd continuous_gesture_recognition\src\app
 python -m venv env
 env\Scripts\activate
