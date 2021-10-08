@@ -77,13 +77,13 @@ FLASK_APP=app.py flask run
 
 **Pytorch ROCm**
 - pytorch-rocm wheel available: https://pytorch.org/get-started/locally/
-  - > **WARNING**: using this resulted in model building errors on tested machine.
+  - > **WARNING**: using this resulted in model building errors on tested machine, but is quick and easy. Likely due to wheel being built for ROCm stack v4.2.
 ```bash
 # as of 8 Oct, 2021
-pip3 install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/rocm4.2/torch_nightly.html
+pip install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/rocm4.2/torch_nightly.html
 ```
 
-- building pytorch from source
+- building pytorch (rocm) from source
   - > this will take a several hours
 ```bash
 # clone pytorch upstream, managed by ROCm (AMD devs)
