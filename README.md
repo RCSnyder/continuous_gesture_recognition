@@ -2,7 +2,7 @@
 # Continuous gesture recognition
 ![Python Version](https://img.shields.io/badge/python-3.9-blue) ![Platform](https://img.shields.io/badge/platform-windows%7Clinux-lightgray)
 
-A live demo to evaluate and compare different models for Continuous Hand Gesture Recognition task performance
+A live demo to evaluate and compare different models for Continuous Hand Gesture Recognition task performance.
 
 ## Requirements (Preferred)
 - Windows 10
