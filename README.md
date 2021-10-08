@@ -32,10 +32,14 @@ set FLASK_APP=app.py
 flask run
 ```
 
-### Linux
-> tested on debian bullseye
+Go to 127.0.0.1:5000 in a web browser to view the app.
+
+
+### Linux (with ROCm)
+> tested on debian bullseye, python v3.9.2, ROCm stack v4.3.0
 
 TODO: investigate pytorch rocm docker container.
+
 ```bash
 cd continuous_gesture_recognition
 
@@ -46,7 +50,7 @@ source .env/bin/activate
 # upgrade pip
 pip install --upgrade pip
 
-# install pytorch: these may change depending on your install strategy. 
+# install pytorch: these may change depending on your install strategy. See Pytorch ROCm below.
 pip install ~/Documents/projects/pytorch/dist/torch-1.11.0a0+git6559604-cp39-cp39-linux_x86_64.whl
 pip install ~/Documents/projects/vision/dist/torchvision-0.10.0a0+e828eef-cp39-cp39-linux_x86_64.whl
 
@@ -58,22 +62,27 @@ cd src/app
 FLASK_APP=app.py flask run
 ```
 
+### Drivers
+
 **CUDA Drivers (NVIDIA GPU)**
 - Download latest CUDA version from here: https://developer.nvidia.com/cuda-downloads
 
 
 **ROCm (AMD GPU)**
 - install rocm: https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html
+  - > ROCm may require dependency hacking for unsupported distros, see: https://github.com/RadeonOpenCompute/ROCm/issues/1125#issuecomment-719656556
+  - > Not all hardware is supported, see: https://github.com/RadeonOpenCompute/ROCm#hardware-and-software-support
 
 **Pytorch ROCm**
-- pytorch-rocm wheel available, but resulted in model building errors: https://pytorch.org/get-started/locally/
+- pytorch-rocm wheel available: https://pytorch.org/get-started/locally/
+  - > **WARNING**: using this resulted in model building errors on tested machine.
 ```bash
 # as of 8 Oct, 2021
 pip3 install --pre torch torchvision -f https://download.pytorch.org/whl/nightly/rocm4.2/torch_nightly.html
 ```
 
 - building pytorch from source
-> this will take a several hours
+  - > this will take a several hours
 ```bash
 # clone pytorch upstream, managed by ROCm (AMD devs)
 git clone git@github.com:ROCmSoftwarePlatform/pytorch.git
@@ -98,7 +107,7 @@ PYTORCH_ROCM_ARCH=<gfx_arch> MAX_JOBS=<n> python setup.py bdist_wheel
 > MAX_JOBS = `(RAM in GB) / 4` as general rule of thumb, if you run into errors try decreasing
 
 - building torchvision (rocm) from source
-> use the same virtual env as the pytorch build
+  - > use the same virtual env as the pytorch build
 ```bash
 # clone torchvision upstream
 git clone git@github.com:ROCmSoftwarePlatform/vision.git
@@ -106,4 +115,3 @@ cd vision
 PYTORCH_ROCM_ARCH=<gfx_arch> MAX_JOBS=<n> python setup.py bdist_wheel
 ```
 
-Go to 127.0.0.1:5000 in a web browser to view the app.
