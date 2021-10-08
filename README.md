@@ -1,10 +1,12 @@
 
-# continuous_gesture_recognition, a live demo to evaluate and compare different models for Continuous Hand Gesture Recognition task performance
+# Continuous gesture recognition
 ![Python Version](https://img.shields.io/badge/python-3.9-blue) ![Platform](https://img.shields.io/badge/platform-windows%7Clinux-lightgray)
 
-## Requirements (Preferred)
+A live demo to evaluate and compare different models for Continuous Hand Gesture Recognition task performance
 
-- CUDA enabled graphics card (or ROCm)
+## Requirements (Preferred)
+- Windows 10
+- CUDA enabled graphics card
 - Anaconda uninstalled
 - Python >3.9
 
