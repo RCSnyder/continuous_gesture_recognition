@@ -1,6 +1,8 @@
 from flask import Flask, render_template, Response, request
 import requests
 from importlib import import_module
+import io
+import base64
 
 import camera_opencv
 import webbrowser
@@ -20,6 +22,8 @@ from DemoModel import FullModel
 from torch import nn
 import transforms as t
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 import json
 import time
 import jsonify
@@ -88,7 +92,7 @@ def gen(camera):
 
 def Demo_Model_1_20BNJester_gen(camera):
     """Video streaming generator function for Demo_Model_1_20BNJester."""
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
     # Set up some storage variables
     seq_len = 16
     value = 0
@@ -194,6 +198,38 @@ def Demo_Model_1_20BNJester_gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+def plot_png():
+
+    while True:
+
+        # try read from queue
+        # if new data create new plot
+        # else continue 
+        fig = create_figure()
+        img = io.BytesIO()
+        FigureCanvas(fig).print_png(img)
+        img.seek(0)
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/png\r\n\r\n' + img.read() + b'\r\n')
+
+        # yield f'<img src="data:image/png;base64,{plot_url}">'
+        time.sleep(1)
+
+def create_figure():
+    fig = Figure(figsize=(8,2))
+    axis = fig.add_subplot(1, 1, 1)
+    xs = range(100)
+    ys = [np.random.randint(1, 50) for x in xs]
+    axis.plot(xs, ys)
+    fig.tight_layout()
+    return fig
+
+@app.route('/accuracy_plot')
+def call_plot():
+    return Response(plot_png(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 @app.route('/Demo_Model_1_20BNJester_video_feed')
 def Demo_Model_1_20BNJester_video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
@@ -204,6 +240,7 @@ def Demo_Model_1_20BNJester_video_feed():
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
+    plot_png()
     return Response(gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
