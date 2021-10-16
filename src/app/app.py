@@ -122,7 +122,6 @@ def Demo_Model_1_20BNJester_gen(camera):
     hist = []
     mean_hist = []
     setup = True
-    # plt.ion()
     
     cooldown = 0
     eval_samples = 2
@@ -176,7 +175,7 @@ def Demo_Model_1_20BNJester_gen(camera):
                 try:
                     confidence_queue.put_nowait(out)
                 except queue.Full as e:
-                    # confidence_queue.
+                    print("WARNING: gesture scores filled output queue Filled")
                     pass
 
             n += 1
@@ -198,45 +197,53 @@ def Demo_Model_1_20BNJester_gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+# TODO: handle multiple sets of labels (currently just Jester)
 def plot_png():
 
-    x_pos = range(len(gesture_labels))
+    confidence_thresh = 0.6
 
-    fig = Figure(figsize=(8,3))
-    axis = fig.add_subplot(1, 1, 1)
-    bars = axis.bar(x_pos, np.zeros(len(gesture_labels)), align="center", tick_label=gesture_labels)
-    axis.set_ylim(0, 1)
-    axis.tick_params(labelrotation=90)
+    pos = range(len(gesture_labels))
 
+    # create figure object, we don't use the matplotlib GUI 
+    # so use the base figure class
+    fig = Figure(figsize=(8,4))
+    ax = fig.add_subplot(1, 1, 1)
+    bars = ax.bar(pos, np.zeros(len(gesture_labels)), align="center")
+    ax.set_ylim(0, 1)
+    ax.set_xticks(pos)
+    ax.set_xticklabels(gesture_labels, rotation=60, ha='right')
+    ax.set_xlabel("Jester gesture classes")
+    ax.set_ylabel("confidence")
     fig.tight_layout()
 
     while True:
 
-        result = confidence_queue.get()
+        try:
+            # read data from queue
+            result = confidence_queue.get(timeout=0.2)
 
-        for rect, y in zip(bars, result):
-            rect.set_height(y)
-        
-        img = io.BytesIO()
-        FigureCanvas(fig).print_png(img)
-        img.seek(0)
+            # update the height for each bar
+            for rect, y in zip(bars, result):
+                if y > confidence_thresh:
+                    rect.set_color("g")
+                else:
+                    rect.set_color("b")
+                rect.set_height(y)
 
-        yield (b'--frame\r\n'
-               b'Content-Type: image/png\r\n\r\n' + img.read() + b'\r\n')
+        except: # no data has been returned, detection is off
+            pass
+            # print("WARNING: no results returned")
+     
+        finally: 
+            # write figure image to io buffer
+            io_buffer = io.BytesIO()
+            FigureCanvas(fig).print_png(io_buffer)
+            io_buffer.seek(0)
 
+            # pass bytes to webpage
+            yield (b'--frame\r\n'
+                b'Content-Type: image/png\r\n\r\n' + io_buffer.read() + b'\r\n')
 
-def create_figure(data):
-
-    x_pos = range(len(data))
-
-    fig = Figure(figsize=(8,3))
-    axis = fig.add_subplot(1, 1, 1)
-    axis.bar(x_pos, data, align="center", tick_label=gesture_labels)
-    axis.set_ylim(0, 1)
-    axis.tick_params(labelrotation=90)
-
-    fig.tight_layout()
-    return fig
 
 @app.route('/accuracy_plot')
 def call_plot():
