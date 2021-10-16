@@ -1,6 +1,9 @@
 from flask import Flask, render_template, Response, request
 import requests
 from importlib import import_module
+import io
+import base64
+import queue
 
 import camera_opencv
 import webbrowser
@@ -20,6 +23,8 @@ from DemoModel import FullModel
 from torch import nn
 import transforms as t
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 import json
 import time
 import jsonify
@@ -31,11 +36,13 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
 
 
-label_dict = pd.read_csv('jester-v1-labels.csv', header=None)
-ges = label_dict[0].tolist()
+with open("jester-v1-labels.txt", "r") as fh:
+    gesture_labels = fh.read().splitlines()
 
 camera = cv2.VideoCapture(0)
 camera.set(cv2.CAP_PROP_FPS, 48)
+
+confidence_queue = queue.Queue(maxsize=10)
 
 app = Flask(__name__)
 
@@ -88,7 +95,7 @@ def gen(camera):
 
 def Demo_Model_1_20BNJester_gen(camera):
     """Video streaming generator function for Demo_Model_1_20BNJester."""
-    fig, ax = plt.subplots()
+    # fig, ax = plt.subplots()
     # Set up some storage variables
     seq_len = 16
     value = 0
@@ -115,7 +122,6 @@ def Demo_Model_1_20BNJester_gen(camera):
     hist = []
     mean_hist = []
     setup = True
-    # plt.ion()
     
     cooldown = 0
     eval_samples = 2
@@ -160,32 +166,29 @@ def Demo_Model_1_20BNJester_gen(camera):
                 if cooldown > 0:
                     cooldown = cooldown - 1
                 if value.item() > 0.6 and indices < 25 and cooldown == 0: 
-                    print('Gesture:', ges[indices], '\t\t\t\t\t\t Value: {:.2f}'.format(value.item()))
+                    print('Gesture:', gesture_labels[indices], '\t\t\t\t\t\t Value: {:.2f}'.format(value.item()))
                     cooldown = 16 
                 pred = indices
                 imgs = imgs[1:]
 
-                df = pd.DataFrame(mean_hist, columns=ges)
-
-                # ax.clear()
-                # df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
-                # if setup:
-                #     plt.show(block = False)
-                #     setup=False
-                # plt.draw()
+                # send predictions to plotting thread
+                try:
+                    confidence_queue.put_nowait(out)
+                except queue.Full as e:
+                    print("WARNING: gesture scores filled output queue Filled")
+                    pass
 
             n += 1
             bg = np.full((480, 640, 3), 15, np.uint8)
             bg[:480, :640] = frame
 
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            if value > 0.6:
-                cv2.putText(bg, ges[pred],(20,465), font, 1,(0,255,0),2)
-            cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
-            for i, top in enumerate(top_3):
-                cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
-                cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
-
+            # font = cv2.FONT_HERSHEY_SIMPLEX
+            # if value > 0.6:
+            #     cv2.putText(bg, ges[pred],(20,465), font, 1,(0,255,0),2)
+            # cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
+            # for i, top in enumerate(top_3):
+            #     cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
+            #     cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
         
             ret, buffer = cv2.imencode('.jpg', bg)
             frame = buffer.tobytes()
@@ -193,6 +196,59 @@ def Demo_Model_1_20BNJester_gen(camera):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+
+# TODO: handle multiple sets of labels (currently just Jester)
+def plot_png():
+
+    confidence_thresh = 0.6
+
+    pos = range(len(gesture_labels))
+
+    # create figure object, we don't use the matplotlib GUI 
+    # so use the base figure class
+    fig = Figure(figsize=(8,4))
+    ax = fig.add_subplot(1, 1, 1)
+    bars = ax.bar(pos, np.zeros(len(gesture_labels)), align="center")
+    ax.set_ylim(0, 1)
+    ax.set_xticks(pos)
+    ax.set_xticklabels(gesture_labels, rotation=60, ha='right')
+    ax.set_xlabel("Jester gesture classes")
+    ax.set_ylabel("confidence")
+    fig.tight_layout()
+
+    while True:
+
+        try:
+            # read data from queue
+            result = confidence_queue.get(timeout=0.2)
+
+            # update the height for each bar
+            for rect, y in zip(bars, result):
+                if y > confidence_thresh:
+                    rect.set_color("g")
+                else:
+                    rect.set_color("b")
+                rect.set_height(y)
+
+        except: # no data has been returned, detection is off
+            pass
+            # print("WARNING: no results returned")
+     
+        finally: 
+            # write figure image to io buffer
+            io_buffer = io.BytesIO()
+            FigureCanvas(fig).print_png(io_buffer)
+            io_buffer.seek(0)
+
+            # pass bytes to webpage
+            yield (b'--frame\r\n'
+                b'Content-Type: image/png\r\n\r\n' + io_buffer.read() + b'\r\n')
+
+
+@app.route('/accuracy_plot')
+def call_plot():
+    return Response(plot_png(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/Demo_Model_1_20BNJester_video_feed')
 def Demo_Model_1_20BNJester_video_feed():
@@ -204,6 +260,7 @@ def Demo_Model_1_20BNJester_video_feed():
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
+    plot_png()
     return Response(gen(camera),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
