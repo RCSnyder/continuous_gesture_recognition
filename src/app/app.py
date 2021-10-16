@@ -144,7 +144,7 @@ def Demo_Model_1_20BNJester_gen(camera):
             if len(imgs) == 16:
                 data = torch.cat(imgs).cuda()
                 output = model(data.unsqueeze(0))
-                out = (torch.nn.Softmax()(output).data).cpu().numpy()[0]
+                out = (torch.nn.Softmax(dim=1)(output).data).cpu().numpy()[0]
                 if len(hist) > 300:
                     mean_hist  = mean_hist[1:]
                     hist  = hist[1:]
