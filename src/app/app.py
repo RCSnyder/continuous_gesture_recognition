@@ -3,6 +3,7 @@ import requests
 from importlib import import_module
 import io
 import base64
+import queue
 
 import camera_opencv
 import webbrowser
@@ -35,11 +36,13 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_holistic = mp.solutions.holistic
 
 
-label_dict = pd.read_csv('jester-v1-labels.csv', header=None)
-ges = label_dict[0].tolist()
+with open("jester-v1-labels.txt", "r") as fh:
+    gesture_labels = fh.read().splitlines()
 
 camera = cv2.VideoCapture(0)
 camera.set(cv2.CAP_PROP_FPS, 48)
+
+confidence_queue = queue.Queue(maxsize=10)
 
 app = Flask(__name__)
 
@@ -164,32 +167,29 @@ def Demo_Model_1_20BNJester_gen(camera):
                 if cooldown > 0:
                     cooldown = cooldown - 1
                 if value.item() > 0.6 and indices < 25 and cooldown == 0: 
-                    print('Gesture:', ges[indices], '\t\t\t\t\t\t Value: {:.2f}'.format(value.item()))
+                    print('Gesture:', gesture_labels[indices], '\t\t\t\t\t\t Value: {:.2f}'.format(value.item()))
                     cooldown = 16 
                 pred = indices
                 imgs = imgs[1:]
 
-                df = pd.DataFrame(mean_hist, columns=ges)
-
-                # ax.clear()
-                # df.plot.line(legend=False, figsize=(16,6),ax=ax, ylim=(0,1))
-                # if setup:
-                #     plt.show(block = False)
-                #     setup=False
-                # plt.draw()
+                # send predictions to plotting thread
+                try:
+                    confidence_queue.put_nowait(out)
+                except queue.Full as e:
+                    # confidence_queue.
+                    pass
 
             n += 1
             bg = np.full((480, 640, 3), 15, np.uint8)
             bg[:480, :640] = frame
 
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            if value > 0.6:
-                cv2.putText(bg, ges[pred],(20,465), font, 1,(0,255,0),2)
-            cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
-            for i, top in enumerate(top_3):
-                cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
-                cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
-
+            # font = cv2.FONT_HERSHEY_SIMPLEX
+            # if value > 0.6:
+            #     cv2.putText(bg, ges[pred],(20,465), font, 1,(0,255,0),2)
+            # cv2.rectangle(bg,(128,48),(640-128,480-48),(0,255,0),3)
+            # for i, top in enumerate(top_3):
+            #     cv2.putText(bg, ges[top],(40,200-70*i), font, 1,(255,255,255),1)
+            #     cv2.rectangle(bg,(400,225-70*i),(int(400+out[top]*170),205-70*i),(255,255,255),3)
         
             ret, buffer = cv2.imencode('.jpg', bg)
             frame = buffer.tobytes()
@@ -200,12 +200,23 @@ def Demo_Model_1_20BNJester_gen(camera):
 
 def plot_png():
 
+    x_pos = range(len(gesture_labels))
+
+    fig = Figure(figsize=(8,3))
+    axis = fig.add_subplot(1, 1, 1)
+    bars = axis.bar(x_pos, np.zeros(len(gesture_labels)), align="center", tick_label=gesture_labels)
+    axis.set_ylim(0, 1)
+    axis.tick_params(labelrotation=90)
+
+    fig.tight_layout()
+
     while True:
 
-        # try read from queue
-        # if new data create new plot
-        # else continue 
-        fig = create_figure()
+        result = confidence_queue.get()
+
+        for rect, y in zip(bars, result):
+            rect.set_height(y)
+        
         img = io.BytesIO()
         FigureCanvas(fig).print_png(img)
         img.seek(0)
@@ -213,15 +224,17 @@ def plot_png():
         yield (b'--frame\r\n'
                b'Content-Type: image/png\r\n\r\n' + img.read() + b'\r\n')
 
-        # yield f'<img src="data:image/png;base64,{plot_url}">'
-        time.sleep(1)
 
-def create_figure():
-    fig = Figure(figsize=(8,2))
+def create_figure(data):
+
+    x_pos = range(len(data))
+
+    fig = Figure(figsize=(8,3))
     axis = fig.add_subplot(1, 1, 1)
-    xs = range(100)
-    ys = [np.random.randint(1, 50) for x in xs]
-    axis.plot(xs, ys)
+    axis.bar(x_pos, data, align="center", tick_label=gesture_labels)
+    axis.set_ylim(0, 1)
+    axis.tick_params(labelrotation=90)
+
     fig.tight_layout()
     return fig
 
