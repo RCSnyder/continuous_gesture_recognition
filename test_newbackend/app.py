@@ -20,7 +20,7 @@ import torch
 import torchvision.transforms
 
 from DemoModel import FullModel
-from utils.image_generator import imgGenerator
+# from utils.image_generator import imgGenerator
 from ringbuffer import RingBuffer
 from utils.fps import FPS
 
@@ -29,9 +29,8 @@ IMG_WIDTH = 640
 IMG_HEIGHT = 480
 IMG_CHANNELS = 3
 
-# RECORDING_FREQ = 0.045
-RECORDING_FREQ = 0.075 # ms; ~ 15 fps
-# RECORDING_FREQ = 0.030 # ~ 30 fps
+RECORDING_FREQ = 0.060 # ms; ~15 fps
+# RECORDING_FREQ = 0.030 # ms; ~30 fps
 
 class Frame(ctypes.Structure):
     """c struct for representing frame and timestamp"""
@@ -90,6 +89,8 @@ def camera_proc(ring_buffer):
 
 def model_reader(ring_buffer, n, confidence_queue):
 
+    print("initalizing model")
+
     model = FullModel(batch_size=1, seq_lenght=16)
     loaded_dict = torch.load('test_newbackend/demo.ckp')
     model.load_state_dict(loaded_dict)
@@ -105,6 +106,8 @@ def model_reader(ring_buffer, n, confidence_queue):
 
     fps = FPS()
     
+    print("beginning detection")
+
     while True:
 
         try:
@@ -116,31 +119,29 @@ def model_reader(ring_buffer, n, confidence_queue):
         tp = np.dtype(Frame)
         arr = np.frombuffer(data, dtype=tp)
 
-        # accessing structured array 
+        # accessing structured numpy array
         timestamps = arr["timestamp_us"]
         frames = arr["frame"]
+        # print(frames.shape) # (16, 480, 640, 3)
         
         # format array as expected by torch
         # float tensor: [0,1]
-        # shape=(batch, frames, channels, height, width)
+        # expected shape = (frames, channels, height, width)
         frames = frames.transpose(0,3,1,2) / 255.
-        # print(frames.shape)
+        # print(frames.shape) # (16, 3, 480, 640)
         
-        # convert to float tensor
+        # convert np.array to torch.tensor
         frame_tensor = torch.Tensor(frames)
 
         # preprocess frames
         imgs = transform(frame_tensor).cuda()
-        # print(imgs.shape)
+        # print(imgs.shape) # (16, 3, 96, 96)
 
-        # predict on frames
+        # predict on frames (after adding a batch dim) 
         output = model(imgs.unsqueeze(dim=0))
 
         # model output
         confidences = (torch.nn.Softmax(dim=1)(output).data).cpu().numpy()[0]
-
-        # we should not be silencing categories.
-        # confidences[-2:] = 0
 
         print(f"model : {fps()} predictions / second")
 
@@ -203,7 +204,7 @@ def plot_png(confidence_queue):
 
         try:
             # read data from queue
-            result = confidence_queue.get(timeout=0.5)
+            result = confidence_queue.get(timeout=0.01)
 
             # update the height for each bar
             for rect, y in zip(bars, result):
@@ -235,11 +236,10 @@ def plot_png(confidence_queue):
 if __name__=="__main__":
     logger = multiprocessing.log_to_stderr(logging.INFO)
 
-    # define ring buffer large enough to hold N "frames" (ctype.Structure defined above)
+    # define ring buffer large enough to hold N "frames" (ctypes.Structure defined above)
     ring_buffer = RingBuffer(c_type=Frame, slot_count=30)
 
-    # define queue to pass confidence data to plotting process/thread
-    # m = multiprocessing.Manager()
+    # define queue to pass confidence data to plotting process
     confidence_queue = multiprocessing.Queue(maxsize=20)  
     
     ring_buffer.new_writer()
@@ -257,7 +257,7 @@ if __name__=="__main__":
         p.daemon = True
         p.start()
 
-    # only run for 20 seconds
+    # only run for 2 minutes
     time.sleep(120)
 
     for p in processes:
