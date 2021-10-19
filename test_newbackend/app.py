@@ -5,6 +5,7 @@ import io
 import multiprocessing
 import time
 import logging
+import queue
 
 import cv2
 import numpy as np
@@ -29,8 +30,8 @@ IMG_WIDTH = 640
 IMG_HEIGHT = 480
 IMG_CHANNELS = 3
 
-RECORDING_FREQ = 0.060 # ms; ~15 fps
-# RECORDING_FREQ = 0.030 # ms; ~30 fps
+# RECORDING_FREQ = 0.060 # ms; ~15 fps
+RECORDING_FREQ = 0.030 # ms; ~30 fps
 
 class Frame(ctypes.Structure):
     """c struct for representing frame and timestamp"""
@@ -42,11 +43,9 @@ class Frame(ctypes.Structure):
 def camera_proc(ring_buffer):
 
     cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FPS, 48)
-    # cap.set(cv2.CAP_PROP_BUFFERSIZE, 0)
 
     # i = 0
-    fps = FPS()
+    cam_fps = FPS()
 
     img = np.empty((IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS), dtype=np.uint8)
 
@@ -63,10 +62,9 @@ def camera_proc(ring_buffer):
 
         ret, img = cap.retrieve()
 
-        # resize to expected, convert to RGB, flip to selfie style
+        # resize to expected, convert to RGB
         img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        # img = cv2.flip(img, 1)
 
         if not ret:
             break
@@ -74,7 +72,7 @@ def camera_proc(ring_buffer):
         frame = Frame(int(time_s * 10e6), np.ctypeslib.as_ctypes(img))
 
         ring_buffer.write(frame)
-        print(f"camera: {fps()} fps")
+        # logger.info(f"camera: {cam_fps():.2f} fps")
 
         # if i and i % 100 == 0:
         #     print('Wrote %d so far' % i)
@@ -84,18 +82,21 @@ def camera_proc(ring_buffer):
 
 
     ring_buffer.writer_done()
-    print('Writer is done')
+    logger.info('Writer is done')
 
 
 def model_reader(ring_buffer, n, confidence_queue):
-
-    print("initalizing model")
+    
+    logger.info("initializing model")
 
     model = FullModel(batch_size=1, seq_lenght=16)
     loaded_dict = torch.load('test_newbackend/demo.ckp')
     model.load_state_dict(loaded_dict)
     model = model.cuda()
     model.eval()
+
+    # call model on dummy data to build graph
+    model(torch.zeros((1, 16, 3, 96, 96), dtype=torch.float32).cuda())
 
     std, mean = [0.2674,  0.2676,  0.2648], [ 0.6,  0.6,  0.6]
     transform = torchvision.transforms.Compose([
@@ -104,17 +105,16 @@ def model_reader(ring_buffer, n, confidence_queue):
         torchvision.transforms.transforms.Normalize(std=std, mean=mean),
     ])
 
-    fps = FPS()
+    model_fps = FPS()
     
-    print("beginning detection")
-
+    logger.info("beginning detection")
     while True:
-
+                
         try:
             data = ring_buffer.blocking_read(None, length=n)
         except ring_buffer.WriterFinishedError:
             break
-
+        
         # structured array
         tp = np.dtype(Frame)
         arr = np.frombuffer(data, dtype=tp)
@@ -136,6 +136,7 @@ def model_reader(ring_buffer, n, confidence_queue):
         # preprocess frames
         imgs = transform(frame_tensor).cuda()
         # print(imgs.shape) # (16, 3, 96, 96)
+        # print(imgs.dtype)
 
         # predict on frames (after adding a batch dim) 
         output = model(imgs.unsqueeze(dim=0))
@@ -143,10 +144,15 @@ def model_reader(ring_buffer, n, confidence_queue):
         # model output
         confidences = (torch.nn.Softmax(dim=1)(output).data).cpu().numpy()[0]
 
-        print(f"model : {fps()} predictions / second")
+        # logger.info(f"model : {model_fps():.2f} predictions / second")
 
         # put confidences in output queue
-        confidence_queue.put(confidences)
+        try:
+            confidence_queue.put_nowait(confidences)
+        except queue.Full:
+            # if full that means plotting is slow, get the oldest data put the new new.
+            _ = confidence_queue.get(timeout=1e-6)
+            confidence_queue.put_nowait(confidences)
 
     # print('Reader %r is done' % id(pointer))
 
@@ -204,17 +210,17 @@ def plot_png(confidence_queue):
 
         try:
             # read data from queue
-            result = confidence_queue.get(timeout=0.01)
+            confidences = confidence_queue.get_nowait()
 
             # update the height for each bar
-            for rect, y in zip(bars, result):
+            for rect, y in zip(bars, confidences):
                 if y > confidence_thresh:
                     rect.set_color("g")
                 else:
                     rect.set_color("b")
                 rect.set_height(y)
 
-        except: # no data has been returned, detection is off
+        except queue.Empty: # no data has been returned, detection is off
             continue
             # print("WARNING: no results returned")
 
@@ -240,7 +246,7 @@ if __name__=="__main__":
     ring_buffer = RingBuffer(c_type=Frame, slot_count=30)
 
     # define queue to pass confidence data to plotting process
-    confidence_queue = multiprocessing.Queue(maxsize=20)  
+    confidence_queue = multiprocessing.Queue(maxsize=2)
     
     ring_buffer.new_writer()
     ring_buffer.new_reader()
