@@ -88,6 +88,7 @@ def camera_proc(ring_buffer):
 def model_reader(ring_buffer, n, confidence_queue):
     
     logger.info("initializing model")
+    t = time.time()
 
     model = FullModel(batch_size=1, seq_lenght=16)
     loaded_dict = torch.load('test_newbackend/demo.ckp')
@@ -98,7 +99,7 @@ def model_reader(ring_buffer, n, confidence_queue):
     # call model on dummy data to build graph
     model(torch.zeros((1, 16, 3, 96, 96), dtype=torch.float32).cuda())
 
-    std, mean = [0.2674,  0.2676,  0.2648], [ 0.6,  0.6,  0.6]
+    std, mean = [0.2674,  0.2676,  0.2648], [ 0.6,  0.6,  0.4]
     transform = torchvision.transforms.Compose([
         torchvision.transforms.transforms.Resize((120,160)),
         torchvision.transforms.transforms.CenterCrop((96, 96)),
@@ -106,7 +107,8 @@ def model_reader(ring_buffer, n, confidence_queue):
     ])
 
     model_fps = FPS()
-    
+
+    logger.info(f"initialization finished, elapsed time: {time.time() - t:.2f} seconds")    
     logger.info("beginning detection")
     while True:
                 
@@ -147,13 +149,13 @@ def model_reader(ring_buffer, n, confidence_queue):
         # logger.info(f"model : {model_fps():.2f} predictions / second")
 
         # put confidences in output queue
-        try:
-            confidence_queue.put_nowait(confidences)
-        except queue.Full:
-            # if full that means plotting is slow, get the oldest data put the new new.
-            _ = confidence_queue.get(timeout=1e-6)
-            confidence_queue.put_nowait(confidences)
-
+        while True:
+            try:
+                confidence_queue.put_nowait(confidences)
+                break
+            except queue.Full:
+                continue
+        
     # print('Reader %r is done' % id(pointer))
 
 
@@ -243,7 +245,7 @@ if __name__=="__main__":
     logger = multiprocessing.log_to_stderr(logging.INFO)
 
     # define ring buffer large enough to hold N "frames" (ctypes.Structure defined above)
-    ring_buffer = RingBuffer(c_type=Frame, slot_count=30)
+    ring_buffer = RingBuffer(c_type=Frame, slot_count=32)
 
     # define queue to pass confidence data to plotting process
     confidence_queue = multiprocessing.Queue(maxsize=2)
