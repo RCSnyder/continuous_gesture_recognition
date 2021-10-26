@@ -72,6 +72,10 @@
                                 <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=on"><button type="button" class="btn btn-success btn-block" name="recognition_toggle" value="Begin Gesture Detection">Begin Gesture Detection</button></a>
                                 <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=off"><button type="button" class="btn btn-danger btn-block" name="recognition_toggle" value="End Gesture Detection">End Gesture Detection</button></a>
                             </div>
+                            
+                            <br>
+                            <img src="{{ url_for('call_plot') }}" alt="gesture classification accuracy">
+
                         </div>
                     </div>
                     <div class="card bg-light mb-3">
