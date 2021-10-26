@@ -93,6 +93,19 @@ def gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+import collections
+import time
+
+class FPS:
+    def __init__(self, avarageof=50):
+        self.frametimestamps = collections.deque(maxlen=avarageof)
+    def __call__(self):
+        self.frametimestamps.append(time.time())
+        if(len(self.frametimestamps) > 1):
+            return round(len(self.frametimestamps)/(self.frametimestamps[-1]-self.frametimestamps[0]), 2)
+        else:
+            return 0.0
+
 def Demo_Model_1_20BNJester_gen(camera):
     """Video streaming generator function for Demo_Model_1_20BNJester."""
     # fig, ax = plt.subplots()
@@ -129,9 +142,13 @@ def Demo_Model_1_20BNJester_gen(camera):
 
     score_energy = torch.zeros((eval_samples, num_classes))
 
+    fps_a = FPS()
+    fps_d = FPS()
+
     while True:
         success, frame = camera.read()
         cv2.flip(frame, 1, frame)
+        # print(f"fps_all: {fps_a()}")
         
         if not success:
             break
@@ -148,14 +165,23 @@ def Demo_Model_1_20BNJester_gen(camera):
 
             # Get model output prediction
             if len(imgs) == 16:
+
+                # print(f"detection_iter_per_sec: {fps_d()}")
+
                 data = torch.cat(imgs).cuda()
                 output = model(data.unsqueeze(0))
                 out = (torch.nn.Softmax(dim=1)(output).data).cpu().numpy()[0]
                 if len(hist) > 300:
                     mean_hist  = mean_hist[1:]
                     hist  = hist[1:]
+                
+                # this is straight cheating.
                 out[-2:] = [0,0]
+                # Softmax should sum to 1.
+                print(sum(out))
+
                 hist.append(out)
+
                 score_energy = torch.tensor(hist[-eval_samples:])
                 curr_mean = torch.mean(score_energy, dim=0)
                 mean_hist.append(curr_mean.cpu().numpy())

@@ -10,7 +10,7 @@
     <header>
         <div class="card bg-light mb-3">
             <div class="card-body">
-                <h1 class="card-title text-center">Continuous Hand Gesture Recognition</h1>
+                <h1 class="card-title text-center">Continuous Hand Gesture Recognition Demo</h1>
             </div>
         </div>
     </header>
@@ -24,9 +24,6 @@
                             <h5 class="card-title">Available Models</h5>
                             <h6 class="card-subtitle mb-2">Select a model for inference</h6>
 
-                            <!-- Make this function: 
-                                  - as models are added we can add them in code and forget about it here
-                                  - maybe a drop down list? -->
                             <div class="list-group list-group-flush">
                                 <a href="{{ url_for('index', selected_model_name='Demo_Model_1_20BNJester') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Demo_Model_1_20BNJester' %}active{% endif %}">Demo_Model_1_20BNJester</a>
                                 <a href="{{ url_for('index', selected_model_name='Google_MediaPipe_Holistic_Model') }}" class="list-group-item list-group-item-action {% if selected_model_name == 'Google_MediaPipe_Holistic_Model' %}active{% endif %}">Google_MediaPipe_Holistic_Model</a>
@@ -43,51 +40,39 @@
                     </div>
                 </div>
                 
-                <div class="col-8">
+                <div class="col-8 text-center">
                     <div class="card bg-light mb-3">
                         <div class="card-body">
-                            <!-- <h5 class="card-title"><strong>Live Webcam Stream</strong></h5> -->
-                            <div class="d-flex flex-row justify-content-between align-items-center">
-                                    <div class="d-flex flex-column">
-                                        <div class="d-flex">
-                                        Detection and Recognition is:&nbsp&nbsp
-                                        <strong>
-                                        {% if gesture_recognition_state == 'on' %}
-                                            <class="text-success" style="color: green">ON
-                                        {% else %}
-                                            <class="text-danger" style="color: red">OFF
-                                        {% endif %}
-                                        </strong>
-                                        </div>
-                                        <div class="d-flex">
-                                            model:&nbsp&nbsp<strong>{{ selected_model_name }}</strong>
-                                        </div>            
-                                    </div>
-                                    <div class="=d-flex">
-                                    <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=on"><button type="button" class="btn btn-success btn-block" name="recognition_toggle" value="Begin Gesture Detection">Begin Gesture Detection</button></a>
-                                    <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=off"><button type="button" class="btn btn-danger btn-block" name="recognition_toggle" value="End Gesture Detection">End Gesture Detection</button></a>
-                                    </div>
-                            </div>
+                            <h5 class="card-title"><strong>Live Webcam Stream</strong></h5>
 
-                            <br>
-
-                            <div class="d-flex flex-column align-items-center">
                             {% if gesture_recognition_state == 'off' %}
-                                <img src="{{ url_for('video_feed') }}" class="img-fluid">
+                                <img src="{{ url_for('video_feed') }}">
                             {% else %}
                                 {% if selected_model_name == 'Demo_Model_1_20BNJester' %}
-                                    <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}" class="img-fluid">
+                                    <img src="{{ url_for('Demo_Model_1_20BNJester_video_feed') }}">
 
                                 {% elif selected_model_name == 'Google_MediaPipe_Holistic_Model'%}
-                                    <img src="{{ url_for('holistic_model_video_feed') }}" class="img-fluid">
+                                    <img src="{{ url_for('holistic_model_video_feed') }}">
                                 {% else %}
-                                    <img src="{{ url_for('video_feed') }}" class="img-fluid">
+                                    <img src="{{ url_for('video_feed') }}">
                                 {% endif %}
                             {% endif %}
-                            <div class="d-flex align-self-end">Stream: opencv(0)</div>
+                            <br>
+                            <br>
+
+                            <h3 class="card-text">Gesture Detection and Recognition is:</h3>
+                            {% if gesture_recognition_state == 'on' %}
+                                <h1 class="card-text" style="color: green">ON</h1>
+                            {% else %}
+                                <h1 class="card-text" style="color: red">OFF</h1>
+                            {% endif %}
+                            <br>
+
+                            <div class='col-xs-3 text-md-center'>
+                                <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=on"><button type="button" class="btn btn-success btn-block" name="recognition_toggle" value="Begin Gesture Detection">Begin Gesture Detection</button></a>
+                                <a href="{{ url_for('index', selected_model_name=selected_model_name) }}?gesture_recognition_state=off"><button type="button" class="btn btn-danger btn-block" name="recognition_toggle" value="End Gesture Detection">End Gesture Detection</button></a>
                             </div>
                             
-
                             <br>
                             <img src="{{ url_for('call_plot') }}" alt="gesture classification accuracy">
 
