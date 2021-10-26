@@ -1,7 +1,10 @@
-# testing new backend
+"""testing new backend
 
+backend demo, with no real frontend. Runs for 2 mins, then kills self.
+
+Question, concerns? raise an issue and `@ianzur` or email ian dot zurutuza at gmail dot com
+"""
 import ctypes
-import io
 import multiprocessing
 import time
 import logging
@@ -10,17 +13,18 @@ import queue
 import cv2
 import numpy as np
 
-import matplotlib
-matplotlib.use("TkAgg")
-
-import matplotlib.pyplot as plt
+# matplotlib backend (opencv windows to display webcam and graph)
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+# current model implementation uses torch
+# TODO: only use "cuda" if available
 import torch
 import torchvision.transforms
 
+# model definition (torch nn.Module)
 from DemoModel import FullModel
+
 # from utils.image_generator import imgGenerator
 from ringbuffer import RingBuffer
 from utils.fps import FPS
@@ -55,34 +59,38 @@ def camera_proc(ring_buffer):
         # img = next(img_gen)
         time_s = time.time()
 
+        # opencv doesn't respond to cap.set(cv2.CAP_PROP_FPS, 30)
+        # so, instead manually force recording frequency.
+        # grab frame from buffer until expected time has elapsed
         while True:
             ret = cap.grab()
             if (time.time() - time_s) > RECORDING_FREQ:
                 break
-
+        
+        # read "grabbed" image
         ret, img = cap.retrieve()
-
-        # resize to expected, convert to RGB
-        img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
         if not ret:
             break
 
+        # resize to expected, convert to RGB
+        img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+
+        # create struct
         frame = Frame(int(time_s * 10e6), np.ctypeslib.as_ctypes(img))
 
+        # write struct
         ring_buffer.write(frame)
+
         # logger.info(f"camera: {cam_fps():.2f} fps")
 
         # if i and i % 100 == 0:
         #     print('Wrote %d so far' % i)
 
         # i += 1
-        # cv2.waitKey(1)
-
 
     ring_buffer.writer_done()
-    logger.info('Writer is done')
+    logger.info('capture proc exited')
 
 
 def model_reader(ring_buffer, n, confidence_queue):
@@ -149,12 +157,15 @@ def model_reader(ring_buffer, n, confidence_queue):
         # logger.info(f"model : {model_fps():.2f} predictions / second")
 
         # put confidences in output queue
-        while True:
-            try:
+        try:
+            confidence_queue.put_nowait(confidences)
+        except queue.Full:
+            try: 
+                confidence_queue.get()
+            except queue.Empty:
+                pass
+            finally:
                 confidence_queue.put_nowait(confidences)
-                break
-            except queue.Full:
-                continue
         
     # print('Reader %r is done' % id(pointer))
 
@@ -184,15 +195,17 @@ def display_reader(ring_buffer, n: int=1):
         cv2.waitKey(1)
 
     cv2.destroyAllWindows()
-
     # print('Reader %r is done' % id(pointer))
 
-with open("src/app/jester-v1-labels.txt", "r") as fh:
-    gesture_labels = fh.read().splitlines()
 
 def plot_png(confidence_queue):
 
+    # confidence > confidence_thresh ? turn bar (patch) green : turn bar (patch) blue
     confidence_thresh = 0.6
+
+    # read jester labels
+    with open("src/app/jester-v1-labels.txt", "r") as fh:
+        gesture_labels = fh.read().splitlines()
 
     pos = range(len(gesture_labels))
 
@@ -224,7 +237,6 @@ def plot_png(confidence_queue):
 
         except queue.Empty: # no data has been returned, detection is off
             continue
-            # print("WARNING: no results returned")
 
         finally:
             # hacky, already implemented for web UI
@@ -232,11 +244,10 @@ def plot_png(confidence_queue):
             canvas.draw()
             buf = canvas.buffer_rgba()
 
-            X = np.asarray(buf) #.transpose()
-            # print(X.shape)
+            X = np.asarray(buf) 
 
             cv2.imshow("test_plot", cv2.cvtColor(X, cv2.COLOR_RGB2BGR))
-            cv2.waitKey(1)            
+            cv2.waitKey(1)
             
     cv2.destroyAllWindows()
 
@@ -248,11 +259,14 @@ if __name__=="__main__":
     ring_buffer = RingBuffer(c_type=Frame, slot_count=32)
 
     # define queue to pass confidence data to plotting process
+    # small size to prevent plot from falling behind
     confidence_queue = multiprocessing.Queue(maxsize=2)
     
     ring_buffer.new_writer()
-    ring_buffer.new_reader()
-    ring_buffer.new_reader()
+
+    # reader pointers ignored, so probably safe to remove this
+    # ring_buffer.new_reader()
+    # ring_buffer.new_reader()
 
     processes = [
         multiprocessing.Process(target=model_reader, args=(ring_buffer, 16, confidence_queue, )),

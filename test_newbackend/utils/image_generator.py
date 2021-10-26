@@ -32,11 +32,12 @@ class imgGenerator:
         n = 9999
         size = 0
 
+        # reversed so exit on the biggest text that would fit
         for size in reversed(range(1, 20)):
 
             size_x, _ = cv2.getTextSize(str(n), self.font, size, self.thickness)[0]
 
-            if (size_x > (self.img_width * .5)) and (size_x < (self.img_width * .75)):
+            if (size_x > (self.img_width * .666)) and (size_x < (self.img_width * .75)):
                 break
 
         return size

@@ -4,8 +4,7 @@ Allows multiple child Python processes started via the multiprocessing module
 to read from a shared ring buffer in the parent process. For each child, a
 pointer is maintained for the purpose of reading. One pointer is maintained by
 for the purpose of writing. Reads may be issued in blocking or non-blocking
-mode. Writes are always in non-blocking mode and will raise an exception
-if the buffer is full.
+mode. Writes are always in non-blocking mode.
 """
 
 import ctypes
@@ -184,6 +183,7 @@ class RingBuffer:
                 raise AlreadyClosedError
 
             position = self.writer.get()
+            # ignore write conflicts
             # if self._has_write_conflict(position):
             #     raise WaitingForReaderError
 
